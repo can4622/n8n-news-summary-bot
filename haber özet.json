@@ -1,0 +1,148 @@
+{
+  "name": "haber özet",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "1ab88d7e-6339-436a-9832-5f6f593f121e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.ntv.com.tr/son-dakika.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -96,
+        -16
+      ],
+      "id": "6fdc72b9-ba8b-4583-a87e-0bfd2e22975e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=Sen bir haber editörüsün. Sana RSS feed verisi gelecek. \nİçinden en önemli 5 haberi seç ve şu formatta özetle:\n\n📰 Günün Haberleri\n\n1. [Başlık]\n   → [1 cümle özet]\n\n2. [Başlık]\n   → [1 cümle özet]\n\nTürkçe yaz, sade ve anlaşılır ol."
+            },
+            {
+              "content": "={{ $json.data }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        -16
+      ],
+      "id": "43f7afa0-fcad-4a56-b1c8-890df6648221",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FLlMZQOIE6OrVG5j",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1990378751",
+        "text": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        -16
+      ],
+      "id": "5872873e-2da2-42b1-81a4-992163ae9023",
+      "name": "Send a text message",
+      "webhookId": "6051ee63-d2b5-4a60-8adc-7245b60e18c3",
+      "credentials": {
+        "telegramApi": {
+          "id": "ijvduiUVISwaUIdt",
+          "name": "Telegram account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b6c690c2-937c-4506-81fa-5d6a69f14ed1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a6fcf8cdbfa694723eeef13d2caf6336a4eca0070633586b77becbe4d7630a97"
+  },
+  "id": "ceNyafwkXmOctnLa",
+  "tags": []
+}
